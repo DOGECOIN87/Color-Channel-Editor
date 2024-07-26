@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video and Image Processing</title>
+  <style>
+    video, img {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Video and Image Processing</h1>
+  <input type="file" id="fileInput" accept="image/*,video/*">
+  <video id="videoPreview" controls></video>
+  <div>
+    <label><input type="checkbox" id="rgbToggle" checked> RGB</label>
+    <label><input type="checkbox" id="hsvToggle" checked> HSV</label>
+    <label><input type="checkbox" id="hsvHToggle" checked> HSV-H</label>
+    <label><input type="checkbox" id="hsvSToggle" checked> HSV-S</label>
+    <label><input type="checkbox" id="hsvVToggle" checked> HSV-V</label>
+    <label><input type="checkbox" id="hslToggle" checked> HSL</label>
+    <label><input type="checkbox" id="xyzToggle" checked> XYZ</label>
+    <label><input type="checkbox" id="labToggle" checked> Lab</label>
+    <label><input type="checkbox" id="lutToggle" checked> LUT</label>
+    <label><input type="checkbox" id="cmykCToggle" checked> CMYK-C</label>
+    <label><input type="checkbox" id="cmykMToggle" checked> CMYK-M</label>
+    <label><input type="checkbox" id="cmykYToggle" checked> CMYK-Y</label>
+    <label><input type="checkbox" id="cmykKToggle" checked> CMYK-K</label>
+  </div>
+  <button id="processBtn">Process</button>
+
+  <!-- Load OpenCV.js -->
+  <script async src="https://docs.opencv.org/4.5.5/opencv.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
