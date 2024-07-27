@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const videoPreview = document.getElementById('videoPreview');
-  const imagePreview = document.getElementById('imagePreview');
+  let originalMat, currentMat;
   let videoInterval;
   let isVideo = false;
 
@@ -9,44 +9,37 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggles = document.querySelectorAll('input[type="checkbox"]');
   toggles.forEach(toggle => {
     toggle.addEventListener('change', () => {
-      if (isVideo) {
-        processVideoFrame();
-      } else {
+      if (currentMat) {
         processImage();
       }
     });
   });
 
   document.getElementById('processBtn').addEventListener('click', () => {
-    if (isVideo) {
-      processVideoFrame();
-    } else {
+    if (currentMat) {
       processImage();
     }
   });
 
   function loadMedia(event) {
     const file = event.target.files[0];
-    const url = URL.createObjectURL(file);
-
-    if (file.type.startsWith('video/')) {
+    if (file.type.startsWith('video')) {
       isVideo = true;
-      videoPreview.style.display = 'block';
-      imagePreview.innerHTML = ''; // Clear previous image
+      const url = URL.createObjectURL(file);
       videoPreview.src = url;
-      videoPreview.play();
-      videoPreview.onloadeddata = () => {
+      videoPreview.onloadedmetadata = () => {
+        videoPreview.play();
         startVideoProcessing();
       };
-    } else if (file.type.startsWith('image/')) {
+    } else if (file.type.startsWith('image')) {
       isVideo = false;
-      videoPreview.style.display = 'none';
       const img = new Image();
-      img.src = url;
+      img.src = URL.createObjectURL(file);
       img.onload = () => {
-        processImage(img);
+        originalMat = cv.imread(img);
+        currentMat = originalMat.clone();
+        processImage();
       };
-      imagePreview.appendChild(img); // Display the loaded image
     }
   }
 
@@ -54,59 +47,72 @@ document.addEventListener('DOMContentLoaded', () => {
     if (videoInterval) {
       clearInterval(videoInterval);
     }
-
     videoInterval = setInterval(() => {
-      processVideoFrame();
-    }, 100); // Process video frame every 100ms
+      const cap = new cv.VideoCapture(videoPreview);
+      originalMat = new cv.Mat(videoPreview.videoHeight, videoPreview.videoWidth, cv.CV_8UC4);
+      cap.read(originalMat);
+      currentMat = originalMat.clone();
+      processImage();
+      cv.imshow('videoPreview', currentMat);
+      currentMat.delete();
+    }, 33); // approximately 30 fps
   }
 
-  function processVideoFrame() {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = videoPreview.videoWidth;
-    canvas.height = videoPreview.videoHeight;
-    ctx.drawImage(videoPreview, 0, 0, canvas.width, canvas.height);
-
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const mat = cv.matFromImageData(imageData);
-
-    applyFilters(mat);
-
-    ctx.putImageData(new ImageData(new Uint8ClampedArray(mat.data), mat.cols, mat.rows), 0, 0);
-    mat.delete();
-
-    imagePreview.innerHTML = ''; // Clear previous canvas
-    imagePreview.appendChild(canvas); // Display the processed frame
-  }
-
-  function processImage(img) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const mat = cv.matFromImageData(imageData);
-
-    applyFilters(mat);
-
-    ctx.putImageData(new ImageData(new Uint8ClampedArray(mat.data), mat.cols, mat.rows), 0, 0);
-    mat.delete();
-
-    imagePreview.innerHTML = ''; // Clear previous canvas
-    imagePreview.appendChild(canvas); // Display the processed image
+  function processImage() {
+    currentMat = originalMat.clone();
+    applyFilters(currentMat);
+    if (!isVideo) {
+      cv.imshow('videoPreview', currentMat);
+    }
   }
 
   function applyFilters(mat) {
-    // Add your filter processing logic here based on the toggles
-    // Example:
-    if (document.getElementById('rgbRToggle').checked) {
-      // Process RGB-R channel
+    let channels = new cv.MatVector();
+    cv.split(mat, channels);
+
+    // Create a blank channel for combining
+    let blank = new cv.Mat(mat.rows, mat.cols, cv.CV_8UC1, new cv.Scalar(0));
+
+    const channelToggles = {
+      'rgbRToggle': [2, blank, blank],
+      'rgbGToggle': [blank, 1, blank],
+      'rgbBToggle': [blank, blank, 0],
+      'hsvHToggle': [0, blank, blank, cv.COLOR_BGR2HSV, cv.COLOR_HSV2BGR],
+      'hsvSToggle': [blank, 1, blank, cv.COLOR_BGR2HSV, cv.COLOR_HSV2BGR],
+      'hsvVToggle': [blank, blank, 2, cv.COLOR_BGR2HSV, cv.COLOR_HSV2BGR],
+      'hslHToggle': [0, blank, blank, cv.COLOR_BGR2HLS, cv.COLOR_HLS2BGR],
+      'hslSToggle': [blank, 2, blank, cv.COLOR_BGR2HLS, cv.COLOR_HLS2BGR],
+      'hslLToggle': [blank, 1, blank, cv.COLOR_BGR2HLS, cv.COLOR_HLS2BGR],
+      'xyzXToggle': [0, blank, blank, cv.COLOR_BGR2XYZ, cv.COLOR_XYZ2BGR],
+      'xyzYToggle': [blank, 1, blank, cv.COLOR_BGR2XYZ, cv.COLOR_XYZ2BGR],
+      'xyzZToggle': [blank, blank, 2, cv.COLOR_BGR2XYZ, cv.COLOR_XYZ2BGR],
+      'labLToggle': [0, blank, blank, cv.COLOR_BGR2Lab, cv.COLOR_Lab2BGR],
+      'labAToggle': [blank, 1, blank, cv.COLOR_BGR2Lab, cv.COLOR_Lab2BGR],
+      'labBToggle': [blank, blank, 2, cv.COLOR_BGR2Lab, cv.COLOR_Lab2BGR]
+    };
+
+    for (const [id, values] of Object.entries(channelToggles)) {
+      if (document.getElementById(id).checked) {
+        let processedMat = new cv.Mat();
+        if (values.length === 3) {
+          let processedChannels = new cv.MatVector();
+          processedChannels.push_back(channels.get(values[0]));
+          processedChannels.push_back(values[1]);
+          processedChannels.push_back(values[2]);
+          cv.merge(processedChannels, processedMat);
+        } else {
+          cv.cvtColor(mat, processedMat, values[3]);
+          let processedChannels = new cv.MatVector();
+          cv.split(processedMat, processedChannels);
+          cv.merge([processedChannels.get(values[0]), values[1], values[2]], processedMat);
+          cv.cvtColor(processedMat, processedMat, values[4]);
+        }
+        cv.addWeighted(mat, 0.0, processedMat, 1.0, 0.0, mat);
+        processedMat.delete();
+      }
     }
-    if (document.getElementById('rgbGToggle').checked) {
-      // Process RGB-G channel
-    }
-    // Add other filters as needed
+
+    channels.delete();
+    blank.delete();
   }
 });
