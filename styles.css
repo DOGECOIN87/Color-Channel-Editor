@@ -1,0 +1,83 @@
+/* General Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #121212;
+  color: #E0E0E0;
+}
+
+h1 {
+  text-align: center;
+  color: #E0E0E0;
+}
+
+/* Input and Video Styles */
+input[type="file"] {
+  display: block;
+  margin: 20px auto;
+  padding: 10px;
+  background-color: #333;
+  color: #E0E0E0;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+video {
+  display: block;
+  margin: 20px auto;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #444;
+  background-color: #000;
+}
+
+/* Filter Checkbox Styles */
+div {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+label {
+  display: inline-block;
+  margin: 10px;
+  font-size: 14px;
+  color: #E0E0E0;
+}
+
+input[type="checkbox"] {
+  margin-right: 5px;
+}
+
+/* Process Button Styles */
+#processBtn {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #1E88E5;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#processBtn:hover {
+  background-color: #1565C0;
+}
+
+/* Additional Modern Styles */
+input[type="file"]::file-selector-button {
+  background-color: #1E88E5;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background-color: #1565C0;
+}
