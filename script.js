@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const videoPreview = document.getElementById('videoPreview');
   const fileInput = document.getElementById('fileInput');
-  let originalMat;
   let videoInterval;
   let isVideo = false;
 
@@ -142,62 +141,3 @@ document.addEventListener('DOMContentLoaded', () => {
         result = channels.get(channel === 'XYZ-X' ? 0 : channel === 'XYZ-Y' ? 1 : 2);
         xyz.delete();
         break;
-      case 'Lab-L':
-      case 'Lab-a':
-      case 'Lab-b':
-        let lab = new cv.Mat();
-        cv.cvtColor(mat, lab, cv.COLOR_RGB2Lab);
-        cv.split(lab, channels);
-        result = channels.get(channel === 'Lab-L' ? 0 : channel === 'Lab-a' ? 1 : 2);
-        lab.delete();
-        break;
-      case 'CMYK-C':
-      case 'CMYK-M':
-      case 'CMYK-Y':
-      case 'CMYK-K':
-        // For CMYK, we need to convert RGB to CMYK manually
-        const cmyk = convertRGBToCMYK(mat);
-        result = cmyk.get(channel === 'CMYK-C' ? 0 : channel === 'CMYK-M' ? 1 : channel === 'CMYK-Y' ? 2 : 3);
-        cmyk.delete();
-        break;
-      default:
-        result = mat;
-    }
-
-    channels.delete();
-    return result;
-  }
-
-  function convertRGBToCMYK(mat) {
-    const cmyk = new cv.MatVector();
-    const k = new cv.Mat(mat.rows, mat.cols, cv.CV_8UC1);
-    const c = new cv.Mat(mat.rows, mat.cols, cv.CV_8UC1);
-    const m = new cv.Mat(mat.rows, mat.cols, cv.CV_8UC1);
-    const y = new cv.Mat(mat.rows, mat.cols, cv.CV_8UC1);
-
-    for (let i = 0; i < mat.rows; i++) {
-      for (let j = 0; j < mat.cols; j++) {
-        let R = mat.ucharPtr(i, j)[0];
-        let G = mat.ucharPtr(i, j)[1];
-        let B = mat.ucharPtr(i, j)[2];
-
-        let K = 1 - Math.max(R / 255, G / 255, B / 255);
-        let C = (1 - (R / 255) - K) / (1 - K);
-        let M = (1 - (G / 255) - K) / (1 - K);
-        let Y = (1 - (B / 255) - K) / (1 - K);
-
-        k.ucharPtr(i, j)[0] = K * 255;
-        c.ucharPtr(i, j)[0] = C * 255;
-        m.ucharPtr(i, j)[0] = M * 255;
-        y.ucharPtr(i, j)[0] = Y * 255;
-      }
-    }
-
-    cmyk.push_back(c);
-    cmyk.push_back(m);
-    cmyk.push_back(y);
-    cmyk.push_back(k);
-
-    return cmyk;
-  }
-});
