@@ -14,17 +14,33 @@
 <body>
   <h1>Video and Image Processing</h1>
   <input type="file" id="fileInput" accept="image/*,video/*">
-  <video id="videoPreview" controls></video>
+  <video id="videoPreview" controls style="display: none;"></video>
+  <div id="imagePreview"></div>
   <div>
-    <label><input type="checkbox" id="rgbToggle" checked> RGB</label>
-    <label><input type="checkbox" id="hsvToggle" checked> HSV</label>
+    <label><input type="checkbox" id="rgbRToggle" checked> RGB-R</label>
+    <label><input type="checkbox" id="rgbGToggle" checked> RGB-G</label>
+    <label><input type="checkbox" id="rgbBToggle" checked> RGB-B</label>
+    <label><input type="checkbox" id="yCbCrYToggle" checked> YCbCr-Y</label>
+    <label><input type="checkbox" id="yCbCrCbToggle" checked> YCbCr-Cb</label>
+    <label><input type="checkbox" id="yCbCrCrToggle" checked> YCbCr-Cr</label>
+    <label><input type="checkbox" id="yuvYToggle" checked> YUV-Y</label>
+    <label><input type="checkbox" id="yuvUToggle" checked> YUV-U</label>
+    <label><input type="checkbox" id="yuvVToggle" checked> YUV-V</label>
     <label><input type="checkbox" id="hsvHToggle" checked> HSV-H</label>
     <label><input type="checkbox" id="hsvSToggle" checked> HSV-S</label>
     <label><input type="checkbox" id="hsvVToggle" checked> HSV-V</label>
-    <label><input type="checkbox" id="hslToggle" checked> HSL</label>
-    <label><input type="checkbox" id="xyzToggle" checked> XYZ</label>
-    <label><input type="checkbox" id="labToggle" checked> Lab</label>
-    <label><input type="checkbox" id="lutToggle" checked> LUT</label>
+    <label><input type="checkbox" id="hlsHToggle" checked> HLS-H</label>
+    <label><input type="checkbox" id="hlsSToggle" checked> HLS-S</label>
+    <label><input type="checkbox" id="hlsLToggle" checked> HLS-L</label>
+    <label><input type="checkbox" id="xyzXToggle" checked> XYZ-X</label>
+    <label><input type="checkbox" id="xyzYToggle" checked> XYZ-Y</label>
+    <label><input type="checkbox" id="xyzZToggle" checked> XYZ-Z</label>
+    <label><input type="checkbox" id="labLToggle" checked> Lab-L</label>
+    <label><input type="checkbox" id="labaToggle" checked> Lab-a</label>
+    <label><input type="checkbox" id="labbToggle" checked> Lab-b</label>
+    <label><input type="checkbox" id="luvLToggle" checked> Luv-L</label>
+    <label><input type="checkbox" id="luuToggle" checked> Luv-u</label>
+    <label><input type="checkbox" id="luvVToggle" checked> Luv-v</label>
     <label><input type="checkbox" id="cmykCToggle" checked> CMYK-C</label>
     <label><input type="checkbox" id="cmykMToggle" checked> CMYK-M</label>
     <label><input type="checkbox" id="cmykYToggle" checked> CMYK-Y</label>
